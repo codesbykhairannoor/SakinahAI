@@ -5,6 +5,7 @@ import DashboardInput from './components/DashboardInput';
 import TimelineView from './components/TimelineView';
 import FocusMode from './components/FocusMode';
 import Muhasabah from './components/Muhasabah';
+import QuranReader from './components/QuranReader';
 import PrivacyBadge from './components/PrivacyBadge';
 
 const MOCK_TASKS = [
@@ -17,7 +18,7 @@ const MOCK_TASKS = [
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('perencanaan'); // 'perencanaan' | 'muhasabah'
+  const [activeTab, setActiveTab] = useState('perencanaan'); // 'perencanaan' | 'muhasabah' | 'quran'
   const [viewState, setViewState] = useState('dashboard'); // 'dashboard' | 'timeline' | 'focus'
   const [tasks, setTasks] = useState([]);
   const [activeTask, setActiveTask] = useState(null);
@@ -70,6 +71,10 @@ export default function App() {
 
           {activeTab === 'muhasabah' && viewState !== 'focus' && (
             <Muhasabah key="muhasabah" />
+          )}
+
+          {activeTab === 'quran' && viewState !== 'focus' && (
+            <QuranReader key="quran" />
           )}
         </AnimatePresence>
 

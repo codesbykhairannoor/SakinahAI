@@ -25,6 +25,16 @@ export default function Navigation({ activeTab, setActiveTab }) {
         >
           Muhasabah
         </button>
+        <button
+          onClick={() => setActiveTab('quran')}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeTab === 'quran'
+              ? 'bg-white shadow-sm text-sakina-text'
+              : 'text-sakina-text/60 hover:text-sakina-text'
+          }`}
+        >
+          Al-Qur'an
+        </button>
       </div>
     </nav>
   );
