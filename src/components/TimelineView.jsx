@@ -2,28 +2,59 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Moon, CheckCircle2, Play } from 'lucide-react';
 
-export default function TimelineView({ tasks, onStartTask, onMarkDone }) {
-  const [timeLeft, setTimeLeft] = useState('00:45:30');
+export default function TimelineView({ tasks, prayerTimes, onStartTask, onMarkDone }) {
+  const [timeLeft, setTimeLeft] = useState('');
+  const [nextPrayerName, setNextPrayerName] = useState('');
 
-  // Simulated countdown
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        let [hrs, mins, secs] = prev.split(':').map(Number);
-        if (secs > 0) secs--;
-        else {
-          secs = 59;
-          if (mins > 0) mins--;
-          else {
-            mins = 59;
-            if (hrs > 0) hrs--;
-          }
-        }
-        return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-      });
-    }, 1000);
+    if (!prayerTimes) return;
+
+    const calculateNextPrayer = () => {
+      const now = new Date();
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+      const currentTimeStr = `${String(currentHours).padStart(2, '0')}:${String(currentMinutes).padStart(2, '0')}`;
+
+      const prayers = [
+        { name: 'Subuh', time: prayerTimes.Fajr },
+        { name: 'Zuhur', time: prayerTimes.Dhuhr },
+        { name: 'Asar', time: prayerTimes.Asr },
+        { name: 'Magrib', time: prayerTimes.Maghrib },
+        { name: 'Isya', time: prayerTimes.Isha }
+      ];
+
+      let next = prayers.find(p => p.time > currentTimeStr);
+      let isTomorrow = false;
+      
+      if (!next) {
+        next = prayers[0];
+        isTomorrow = true;
+      }
+
+      setNextPrayerName(next.name);
+
+      const [nextHours, nextMinutes] = next.time.split(':').map(Number);
+      
+      let targetDate = new Date(now);
+      targetDate.setHours(nextHours, nextMinutes, 0, 0);
+      if (isTomorrow) {
+        targetDate.setDate(targetDate.getDate() + 1);
+      }
+
+      const diffMs = targetDate - now;
+      if (diffMs > 0) {
+        const h = Math.floor(diffMs / 1000 / 60 / 60);
+        const m = Math.floor((diffMs / 1000 / 60) % 60);
+        const s = Math.floor((diffMs / 1000) % 60);
+        setTimeLeft(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
+      }
+    };
+
+    calculateNextPrayer();
+    const timer = setInterval(calculateNextPrayer, 1000);
+    
     return () => clearInterval(timer);
-  }, []);
+  }, [prayerTimes]);
 
   return (
     <motion.div
@@ -33,9 +64,15 @@ export default function TimelineView({ tasks, onStartTask, onMarkDone }) {
       className="max-w-2xl mx-auto px-4 sm:px-6 py-8"
     >
       <div className="sticky top-20 z-40 bg-white/80 backdrop-blur-md py-4 mb-8 rounded-2xl shadow-sm border border-sakina-text/5 flex justify-center items-center">
-        <span className="text-sakina-text/80 font-medium tracking-wide">
-          Menuju Zuhur: <span className="font-bold text-sakina-text">{timeLeft}</span>
-        </span>
+        {prayerTimes ? (
+          <span className="text-sakina-text/80 font-medium tracking-wide">
+            Menuju {nextPrayerName}: <span className="font-bold text-sakina-text">{timeLeft}</span>
+          </span>
+        ) : (
+          <span className="text-sakina-text/80 font-medium tracking-wide animate-pulse">
+            Memuat jadwal salat...
+          </span>
+        )}
       </div>
 
       <div className="relative space-y-6 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-sakina-text/10 before:to-transparent">

@@ -37,8 +37,22 @@ export default function DashboardInput({ initialInput, onSubmit }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="max-w-2xl mx-auto px-6 py-12 md:py-24"
+      className="max-w-2xl mx-auto px-6 py-8 md:py-16"
     >
+      {/* Inspirasi Harian */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.2 }}
+        className="mb-12 p-6 md:p-8 bg-white/50 backdrop-blur-sm rounded-3xl border border-sakina-text/5 text-center shadow-sm"
+      >
+        <span className="text-xs font-bold tracking-widest text-sakina-primary uppercase mb-3 block">Inspirasi Harian</span>
+        <p className="font-serif text-lg md:text-xl text-sakina-text/90 italic leading-relaxed">
+          "Tidaklah seorang muslim tertimpa suatu kelelahan, atau penyakit, atau kehawatiran, atau kesedihan, atau gangguan, bahkan duri yang melukainya melainkan Allah akan menghapus kesalahan-kesalahannya karenanya."
+        </p>
+        <span className="text-sm text-sakina-text/50 mt-4 block">— HR. Bukhari & Muslim</span>
+      </motion.div>
+
       <h2 className="text-3xl md:text-4xl font-serif text-sakina-text mb-8">
         Selamat pagi. Apa misi kita hari ini?
       </h2>

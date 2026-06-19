@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Navigation from './components/Navigation';
 import DashboardInput from './components/DashboardInput';
@@ -9,12 +9,9 @@ import QuranReader from './components/QuranReader';
 import PrivacyBadge from './components/PrivacyBadge';
 
 const MOCK_TASKS = [
-  { id: 1, title: 'Revisi Desain UI/UX Klien', time: '09:00 - 11:30', type: 'task', done: false },
-  { id: 2, title: 'Zuhur', time: '12:00', type: 'prayer' },
-  { id: 3, title: 'Tugas Kuliah Sistem Informasi', time: '13:00 - 15:00', type: 'task', done: false },
-  { id: 4, title: 'Asar', time: '15:20', type: 'prayer' },
-  { id: 5, title: 'Kelas Studi Independen Data Science', time: '16:00 - 17:45', type: 'task', done: false },
-  { id: 6, title: 'Magrib', time: '18:00', type: 'prayer' },
+  { id: 't1', title: 'Revisi Desain UI/UX Klien', time: '09:00 - 11:30', type: 'task', done: false },
+  { id: 't2', title: 'Tugas Kuliah Sistem Informasi', time: '13:00 - 15:00', type: 'task', done: false },
+  { id: 't3', title: 'Kelas Studi Independen Data Science', time: '16:00 - 17:45', type: 'task', done: false },
 ];
 
 export default function App() {
@@ -22,11 +19,39 @@ export default function App() {
   const [viewState, setViewState] = useState('dashboard'); // 'dashboard' | 'timeline' | 'focus'
   const [tasks, setTasks] = useState([]);
   const [activeTask, setActiveTask] = useState(null);
+  const [prayerTimes, setPrayerTimes] = useState(null);
+
+  useEffect(() => {
+    fetch('https://api.aladhan.com/v1/timingsByCity?city=Jakarta&country=Indonesia&method=11')
+      .then(res => res.json())
+      .then(data => {
+        setPrayerTimes(data.data.timings);
+      })
+      .catch(err => console.error("Failed to fetch prayer times", err));
+  }, []);
 
   const handlePlanSubmit = (input) => {
-    // In a real app, this would send the input to an AI to parse into tasks.
-    // Here we use the mock data.
-    setTasks(MOCK_TASKS);
+    let combinedTasks = [...MOCK_TASKS];
+    
+    if (prayerTimes) {
+      const prayers = [
+        { id: 'p1', title: 'Subuh', time: prayerTimes.Fajr, type: 'prayer' },
+        { id: 'p2', title: 'Zuhur', time: prayerTimes.Dhuhr, type: 'prayer' },
+        { id: 'p3', title: 'Asar', time: prayerTimes.Asr, type: 'prayer' },
+        { id: 'p4', title: 'Magrib', time: prayerTimes.Maghrib, type: 'prayer' },
+        { id: 'p5', title: 'Isya', time: prayerTimes.Isha, type: 'prayer' }
+      ];
+      combinedTasks = [...combinedTasks, ...prayers];
+    }
+    
+    // Sort chronologically based on start time
+    combinedTasks.sort((a, b) => {
+      const timeA = a.time.split(' - ')[0]; // Extract start time e.g. "09:00"
+      const timeB = b.time.split(' - ')[0];
+      return timeA.localeCompare(timeB);
+    });
+
+    setTasks(combinedTasks);
     setViewState('timeline');
   };
 
@@ -64,6 +89,7 @@ export default function App() {
             <TimelineView 
               key="timeline"
               tasks={tasks}
+              prayerTimes={prayerTimes}
               onStartTask={handleStartTask}
               onMarkDone={handleMarkDone}
             />
